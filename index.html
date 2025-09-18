@@ -117,7 +117,7 @@
             <div id="results-content" class="space-y-6">
                 <!-- Results will be dynamically inserted here -->
             </div>
-            <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+            <div class="mt-10 flex flex-col sm:flex-row justify-center items-baseline gap-4">
                 <button id="save-image-btn" class="w-full sm:w-auto bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors duration-300">이미지로 저장</button>
                 <button id="save-pdf-btn" class="w-full sm:w-auto bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition-colors duration-300">PDF로 저장</button>
                 <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors duration-300">다시하기</button>
@@ -267,7 +267,7 @@
                            <div class="flex items-center ml-20">
                              <div class="w-full bg-gray-200 rounded-full h-8">
                                <div class="${result.color} h-8 rounded-full flex items-center justify-end pr-3" style="width: ${percentage}%">
-                                  <span class="text-white font-bold text-lg leading-8">${result.score}점</span>
+                                  <span class="text-white font-bold text-lg">${result.score}점</span>
                                </div>
                              </div>
                            </div>
@@ -371,5 +371,4 @@
 
 </body>
 </html>
-
 
