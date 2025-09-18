@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어린이 욕구강도 검사 프로그램</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Paperlogy', sans-serif;
+        }
+        .custom-radio {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+        .custom-radio:checked {
+            border-color: transparent;
+        }
+        .custom-radio:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background-color: var(--radio-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.2s ease-in-out;
+        }
+        .custom-radio:checked:before {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        .custom-radio.before\:bg-red-400:before { --radio-color: #f87171; }
+        .custom-radio.before\:bg-blue-400:before { --radio-color: #60a5fa; }
+        .custom-radio.before\:bg-green-400:before { --radio-color: #4ade80; }
+        .custom-radio.before\:bg-yellow-400:before { --radio-color: #facc15; }
+        .custom-radio.before\:bg-purple-400:before { --radio-color: #a78bfa; }
+
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+
+        #scrollToTopBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div id="start-screen" class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="text-center bg-white p-8 rounded-2xl shadow-lg max-w-2xl w-full">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">어린이 욕구강도 프로파일</h1>
+            <p class="text-gray-600 mb-6">자신의 마음에 대해 알아보는 시간이에요!<br>아래 질문들을 읽고 자신에게 가장 가깝다고 생각하는 것을 골라주세요.</p>
+            <input type="text" id="user-name" class="w-full max-w-sm border-2 border-gray-200 p-3 rounded-lg text-lg mb-6 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="이름을 입력해주세요">
+            <button id="start-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md">검사 시작! ✨</button>
+            <p class="text-xs text-gray-400 mt-8">출처: <a href="https://eduhope88.tistory.com/521" target="_blank" class="underline">https://eduhope88.tistory.com/521</a></p>
+        </div>
+    </div>
+
+    <div id="survey-screen" class="hidden container mx-auto p-4 md:p-8 max-w-4xl">
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800"><span id="survey-user-name"></span> 어린이의 마음 알아보기</h2>
+            </div>
+            
+            <div class="sticky top-0 bg-white py-4 z-10 shadow-sm mb-4">
+                 <div class="flex justify-between items-center mb-1">
+                    <span class="text-sm font-medium text-indigo-700">진행도</span>
+                    <span id="progress-text" class="text-sm font-medium text-indigo-700">0 / 50</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <form id="needs-survey-form">
+                <!-- Questions will be dynamically inserted here -->
+            </form>
+            <div class="text-center mt-10">
+                <button type="button" id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md">결과 보기 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-screen" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div id="results-container" class="bg-white rounded-2xl shadow-lg p-6 md:p-10 max-w-4xl w-full">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800"><span id="result-user-name"></span> 어린이의 욕구강도 결과</h2>
+                <p class="text-gray-600 mt-2">나의 마음 속 강한 욕구는 무엇일까요?</p>
+            </div>
+            <div id="results-content" class="space-y-6">
+                <!-- Results will be dynamically inserted here -->
+            </div>
+            <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button id="save-image-btn" class="w-full sm:w-auto bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors duration-300">이미지로 저장</button>
+                <button id="save-pdf-btn" class="w-full sm:w-auto bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition-colors duration-300">PDF로 저장</button>
+                <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors duration-300">다시하기</button>
+            </div>
+        </div>
+    </div>
+
+    <button id="scrollToTopBtn" title="맨 위로 이동">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+
+
+    <script>
+        const surveyData = {
+            survival: {
+                name: "생존의 욕구",
+                color: "bg-red-400",
+                description: "안전하고 건강하게 지내고 싶어하는 마음이에요.",
+                questions: [
+                    "돈을 아껴쓴다", "돈이 생기면 모으거나 저축한다", "몸이 아프면 낫기 위해 열심히 노력한다", "밥 먹을 때는 골고루 먹으려고 한다", "학교의 규칙을 지키는 것이 편하다", "선생님이나 부모님이 싫어할 만한 일은 하지 않는다", "하던 대로 하는 것이 편하다", "위험해 보이는 일은 하지 않는다", "옷이나 머리를 깔끔하게 하는 것이 좋다", "쓸 수 있는 물건은 버리지 않고 간직한다"
+                ]
+            },
+            love: {
+                name: "사랑과 소속의 욕구",
+                color: "bg-blue-400",
+                description: "친구들과 사이좋게 지내고 사랑을 주고받고 싶은 마음이에요.",
+                questions: [
+                    "관심과 사랑을 받지 못하면 힘들다", "친구에 대해 궁금한 것이 많다", "친구가 도움이 필요할 때 잘 돕는다", "힘들거나 불편한 사람을 보면 도와주고 싶은 마음이 든다", "사람들과 함께 있는 것이 좋다", "친한 친구와 자주 만나고 이야기도 많이 한다", "나누어 주는 것을 좋아한다", "다른 사람이 나를 좋아해 주면 좋겠다", "친절한 편이다", "친구들과 함께 모여 놀거나 과제를 하는 것이 편하다"
+                ]
+            },
+            power: {
+                name: "힘(성취)의 욕구",
+                color: "bg-green-400",
+                description: "무언가를 잘 해내서 인정받고 싶어하는 마음이에요.",
+                questions: [
+                    "내가 한 일에 대해 인정받고 싶다", "다른 사람이나 친구가 잘못했을 때 잘못에 대해 이야기한다", "다른 사람이나 친구에게 무엇을 하라고 잘 시키는 편이다", "놀거나 뭔가를 결정할 때 내가 낸 의견으로 정해지면 좋겠다", "쉽지 않은 상황이라도 내가 원하는 것을 하고 싶다", "친구가 무리한 부탁을 할 때 거절할 수 있다", "내가 하는 일에서 최고가 되고 싶다", "모든 친구들이 내 말대로 따라주면 좋겠다", "어른도 잘못 생각할 때는 말해줘야 한다고 생각한다", "내가 해낸 것과 능력이 자랑스럽다"
+                ]
+            },
+            freedom: {
+                name: "자유의 욕구",
+                color: "bg-yellow-400",
+                description: "내 마음대로 선택하고 자유롭게 행동하고 싶은 마음이에요.",
+                questions: [
+                    "교사나 부모님이 나에게 뭔가를 시키면 부담스럽다", "친해도 가끔 만나는 것이 좋다", "좋은 것도 강요하면 안된다고 생각한다", "누구나 자유롭게 선택할 수 있도록 존중해 주어야 한다", "내가 하고 싶은 일을, 하고 싶을 때 하기 원한다", "나 혼자 있는 시간이 필요하다", "정해진 계획이 불편하다", "한 가지를 끝까지 하는 것이 어렵다", "친구의 의견이 나와 달라도 괜찮다", "계획과 다르게 진행되어도 괜찮다"
+                ]
+            },
+            fun: {
+                name: "즐거움의 욕구",
+                color: "bg-purple-400",
+                description: "새로운 것을 배우고 신나게 놀고 싶은 마음이에요.",
+                questions: [
+                    "큰소리로 웃기 좋아한다", "유머를 사용하거나 듣는 것이 즐겁다", "나 자신에 대해서 웃을 때가 있다", "새로운 것을 배우는 것이 즐겁다", "흥미있는 게임이나 놀이를 좋아한다", "여행이 좋다", "독서를 좋아한다", "영화를 즐겨본다", "호기심이 많다", "새로운 방식으로 생각해 보는 것이 즐겁다"
+                ]
+            }
+        };
+
+        const ratingLabels = ['전혀<br>그렇지 않다', '별로<br>그렇지 않다', '때때로<br>그렇다', '자주<br>그렇다', '언제나<br>그렇다'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('needs-survey-form');
+            const startBtn = document.getElementById('start-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const saveImageBtn = document.getElementById('save-image-btn');
+            const savePdfBtn = document.getElementById('save-pdf-btn');
+
+            const startScreen = document.getElementById('start-screen');
+            const surveyScreen = document.getElementById('survey-screen');
+            const resultsScreen = document.getElementById('results-screen');
+            
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+            function renderSurvey() {
+                let html = '<div class="space-y-8">';
+                let questionCounter = 1;
+                for (const [key, category] of Object.entries(surveyData)) {
+                    category.questions.forEach((question, index) => {
+                        html += `<div class="question-item border-t pt-6">
+                                    <p class="text-lg text-gray-700 font-medium mb-3">${questionCounter}. ${question}</p>
+                                    <div class="flex items-center justify-around flex-wrap">`;
+                        for (let i = 1; i <= 5; i++) {
+                            html += `<label for="q_${key}_${index}_${i}" class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition">
+                                        <input type="radio" id="q_${key}_${index}_${i}" name="q_${key}_${index}" value="${i}" class="custom-radio ${category.color.replace('bg-', 'before:bg-')}" required>
+                                        <span class="text-sm text-gray-600 text-center">${ratingLabels[i - 1]}</span>
+                                    </label>`;
+                        }
+                        html += `</div></div>`;
+                        questionCounter++;
+                    });
+                }
+                html += '</div>';
+                form.innerHTML = html;
+                
+                form.addEventListener('change', updateProgress);
+            }
+            
+            function updateProgress() {
+                const totalQuestions = 50;
+                const answeredQuestions = form.querySelectorAll('input[type="radio"]:checked').length;
+                const percentage = (answeredQuestions / totalQuestions) * 100;
+                
+                progressBar.style.width = `${percentage}%`;
+                progressText.textContent = `${answeredQuestions} / ${totalQuestions}`;
+            }
+
+            function showResults() {
+                const formData = new FormData(form);
+                const scores = {
+                    survival: 0,
+                    love: 0,
+                    power: 0,
+                    freedom: 0,
+                    fun: 0
+                };
+
+                for (let [name, value] of formData.entries()) {
+                    const [q, key, index] = name.split('_');
+                    scores[key] += parseInt(value);
+                }
+
+                const resultsArray = Object.keys(scores).map(key => ({
+                    key,
+                    name: surveyData[key].name,
+                    score: scores[key],
+                    color: surveyData[key].color,
+                    description: surveyData[key].description,
+                    percentage: (scores[key] / 50) * 100 // max score for each category is 50
+                }));
+
+                resultsArray.sort((a, b) => b.score - a.score);
+
+                const resultsContent = document.getElementById('results-content');
+                let html = '<div class="space-y-4">';
+                resultsArray.forEach(result => {
+                    const percentage = (result.score / 50) * 100;
+                    html += `
+                        <div class="p-4 rounded-lg border">
+                           <div class="flex items-baseline">
+                             <h3 class="text-xl font-bold text-gray-700 w-48">${result.name}</h3>
+                           </div>
+                           <p class="text-gray-600 ml-20 mb-3">${result.description}</p>
+                           <div class="flex items-center ml-20">
+                             <div class="w-full bg-gray-200 rounded-full h-8">
+                               <div class="${result.color} h-8 rounded-full flex items-center justify-end pr-3" style="width: ${percentage}%">
+                                  <span class="text-white font-bold text-lg leading-8">${result.score}점</span>
+                               </div>
+                             </div>
+                           </div>
+                        </div>`;
+                });
+                html += '</div>';
+
+                resultsContent.innerHTML = html;
+                document.getElementById('result-user-name').textContent = document.getElementById('user-name').value;
+                surveyScreen.classList.add('hidden');
+                resultsScreen.classList.remove('hidden');
+                window.scrollTo(0, 0);
+            }
+
+            startBtn.addEventListener('click', () => {
+                const userName = document.getElementById('user-name').value;
+                if (userName.trim() === '') {
+                    alert('이름을 입력해주세요!');
+                    return;
+                }
+                document.getElementById('survey-user-name').textContent = userName;
+                startScreen.classList.add('hidden');
+                surveyScreen.classList.remove('hidden');
+                renderSurvey();
+            });
+
+            submitBtn.addEventListener('click', () => {
+                const allQuestionItems = form.querySelectorAll('.question-item');
+                let firstUnansweredItem = null;
+
+                // 기존에 표시된 미답변 표시를 모두 제거합니다.
+                allQuestionItems.forEach(item => {
+                    item.classList.remove('bg-red-100', 'rounded-lg', 'p-2');
+                });
+
+                // 모든 문항을 확인하여 답변되지 않은 문항을 찾습니다.
+                allQuestionItems.forEach(item => {
+                    const isAnswered = item.querySelector('input[type="radio"]:checked');
+                    if (!isAnswered) {
+                        item.classList.add('bg-red-100', 'rounded-lg', 'p-2');
+                        if (!firstUnansweredItem) {
+                            firstUnansweredItem = item;
+                        }
+                    }
+                });
+
+                // 미답변 문항이 있으면 알림을 띄우고 해당 위치로 스크롤합니다.
+                if (firstUnansweredItem) {
+                    alert('답변하지 않은 문항이 있습니다. 붉은색으로 표시된 문항에 답변해주세요.');
+                    firstUnansweredItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    // 모든 문항에 답변했으면 결과를 보여줍니다.
+                    showResults();
+                }
+            });
+
+            restartBtn.addEventListener('click', () => {
+                location.reload();
+            });
+
+            saveImageBtn.addEventListener('click', () => {
+                const resultsContainer = document.getElementById('results-container');
+                 html2canvas(resultsContainer, { scale: 2 }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'needs_survey_result.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            });
+
+            savePdfBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const resultsContainer = document.getElementById('results-container');
+                
+                html2canvas(resultsContainer, { scale: 2 }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF({
+                        orientation: 'p',
+                        unit: 'px',
+                        format: [canvas.width, canvas.height]
+                    });
+                    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                    pdf.save('needs_survey_result.pdf');
+                });
+            });
+
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 200) {
+                    scrollToTopBtn.style.display = 'block';
+                } else {
+                    scrollToTopBtn.style.display = 'none';
+                }
+            });
+
+            scrollToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+        });
+    </script>
+
+</body>
+</html>
+
+
