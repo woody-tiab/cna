@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>어린이 욕구강도 검사 프로그램</title>
+    <title>어린이/청소년 욕구강도 검사 프로그램</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -73,16 +73,21 @@
 </head>
 <body class="bg-gray-50">
 
+    <!-- Start Screen -->
     <div id="start-screen" class="min-h-screen flex flex-col items-center justify-center p-4">
         <div class="text-center bg-white p-8 rounded-2xl shadow-lg max-w-2xl w-full">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">어린이 욕구강도 프로파일</h1>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">나의 욕구강도 프로파일</h1>
             <p class="text-gray-600 mb-6">자신의 마음에 대해 알아보는 시간이에요!<br>아래 질문들을 읽고 자신에게 가장 가깝다고 생각하는 것을 골라주세요.</p>
             <input type="text" id="user-name" class="w-full max-w-sm border-2 border-gray-200 p-3 rounded-lg text-lg mb-6 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="이름을 입력해주세요">
-            <button id="start-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md">검사 시작! ✨</button>
-            <p class="text-xs text-gray-400 mt-8">출처: <a href="https://eduhope88.tistory.com/521" target="_blank" class="underline">https://eduhope88.tistory.com/521</a></p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                 <button id="start-child-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md">어린이용 검사 시작! ✨</button>
+                 <button id="start-teen-btn" class="bg-teal-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-teal-700 transition-colors duration-300 shadow-md">청소년용 검사 시작! 🚀</button>
+            </div>
+            <p class="text-xs text-gray-400 mt-8">원본 출처: <a href="https://eduhope88.tistory.com/521" target="_blank" class="underline">https://eduhope88.tistory.com/521</a></p>
         </div>
     </div>
 
+    <!-- Survey Screen -->
     <div id="survey-screen" class="hidden container mx-auto p-4 md:p-8 max-w-4xl">
         <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10">
             <div class="text-center mb-8">
@@ -91,12 +96,12 @@
             
             <div class="sticky top-0 bg-white py-4 z-10 shadow-sm mb-4">
                  <div class="flex justify-between items-center mb-1">
-                    <span class="text-sm font-medium text-indigo-700">진행도</span>
-                    <span id="progress-text" class="text-sm font-medium text-indigo-700">0 / 50</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
-                </div>
+                     <span class="text-sm font-medium text-indigo-700">진행도</span>
+                     <span id="progress-text" class="text-sm font-medium text-indigo-700">0 / 50</span>
+                 </div>
+                 <div class="w-full bg-gray-200 rounded-full h-2.5">
+                     <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+                 </div>
             </div>
 
             <form id="needs-survey-form">
@@ -108,23 +113,33 @@
         </div>
     </div>
 
+    <!-- Results Screen -->
     <div id="results-screen" class="hidden min-h-screen flex items-center justify-center p-4">
         <div id="results-container" class="bg-white rounded-2xl shadow-lg p-6 md:p-10 max-w-4xl w-full">
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800"><span id="result-user-name"></span> 어린이의 욕구강도 결과</h2>
+                <h2 class="text-3xl font-bold text-gray-800"><span id="result-user-name"></span>의 욕구강도 결과</h2>
                 <p class="text-gray-600 mt-2">나의 마음 속 강한 욕구는 무엇일까요?</p>
             </div>
             <div id="results-content" class="space-y-6">
                 <!-- Results will be dynamically inserted here -->
             </div>
-            <div class="mt-10 flex flex-col sm:flex-row justify-center items-baseline gap-4">
+            <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
                 <button id="save-image-btn" class="w-full sm:w-auto bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors duration-300">이미지로 저장</button>
                 <button id="save-pdf-btn" class="w-full sm:w-auto bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition-colors duration-300">PDF로 저장</button>
                 <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors duration-300">다시하기</button>
             </div>
         </div>
     </div>
+    
+    <!-- Custom Alert Modal -->
+    <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
+            <p id="alert-modal-text" class="mb-4 text-lg text-gray-700"></p>
+            <button id="alert-modal-close" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">확인</button>
+        </div>
+    </div>
 
+    <!-- Scroll to top button -->
     <button id="scrollToTopBtn" title="맨 위로 이동">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
@@ -133,54 +148,81 @@
 
 
     <script>
-        const surveyData = {
-            survival: {
-                name: "생존의 욕구",
-                color: "bg-red-400",
-                description: "안전하고 건강하게 지내고 싶어하는 마음이에요.",
-                questions: [
-                    "돈을 아껴쓴다", "돈이 생기면 모으거나 저축한다", "몸이 아프면 낫기 위해 열심히 노력한다", "밥 먹을 때는 골고루 먹으려고 한다", "학교의 규칙을 지키는 것이 편하다", "선생님이나 부모님이 싫어할 만한 일은 하지 않는다", "하던 대로 하는 것이 편하다", "위험해 보이는 일은 하지 않는다", "옷이나 머리를 깔끔하게 하는 것이 좋다", "쓸 수 있는 물건은 버리지 않고 간직한다"
-                ]
+        const surveyDataSets = {
+            child: {
+                survival: {
+                    name: "생존의 욕구",
+                    color: "bg-red-400",
+                    description: "안전하고 건강하게 지내고 싶어하는 마음이에요.",
+                    questions: ["돈을 아껴쓴다", "돈이 생기면 모으거나 저축한다", "몸이 아프면 낫기 위해 열심히 노력한다", "밥 먹을 때는 골고루 먹으려고 한다", "학교의 규칙을 지키는 것이 편하다", "선생님이나 부모님이 싫어할 만한 일은 하지 않는다", "하던 대로 하는 것이 편하다", "위험해 보이는 일은 하지 않는다", "옷이나 머리를 깔끔하게 하는 것이 좋다", "쓸 수 있는 물건은 버리지 않고 간직한다"]
+                },
+                love: {
+                    name: "사랑과 소속의 욕구",
+                    color: "bg-blue-400",
+                    description: "친구들과 사이좋게 지내고 사랑을 주고받고 싶은 마음이에요.",
+                    questions: ["관심과 사랑을 받지 못하면 힘들다", "친구에 대해 궁금한 것이 많다", "친구가 도움이 필요할 때 잘 돕는다", "힘들거나 불편한 사람을 보면 도와주고 싶은 마음이 든다", "사람들과 함께 있는 것이 좋다", "친한 친구와 자주 만나고 이야기도 많이 한다", "나누어 주는 것을 좋아한다", "다른 사람이 나를 좋아해 주면 좋겠다", "친절한 편이다", "친구들과 함께 모여 놀거나 과제를 하는 것이 편하다"]
+                },
+                power: {
+                    name: "힘(성취)의 욕구",
+                    color: "bg-green-400",
+                    description: "무언가를 잘 해내서 인정받고 싶어하는 마음이에요.",
+                    questions: ["내가 한 일에 대해 인정받고 싶다", "다른 사람이나 친구가 잘못했을 때 잘못에 대해 이야기한다", "다른 사람이나 친구에게 무엇을 하라고 잘 시키는 편이다", "놀거나 뭔가를 결정할 때 내가 낸 의견으로 정해지면 좋겠다", "쉽지 않은 상황이라도 내가 원하는 것을 하고 싶다", "친구가 무리한 부탁을 할 때 거절할 수 있다", "내가 하는 일에서 최고가 되고 싶다", "모든 친구들이 내 말대로 따라주면 좋겠다", "어른도 잘못 생각할 때는 말해줘야 한다고 생각한다", "내가 해낸 것과 능력이 자랑스럽다"]
+                },
+                freedom: {
+                    name: "자유의 욕구",
+                    color: "bg-yellow-400",
+                    description: "내 마음대로 선택하고 자유롭게 행동하고 싶은 마음이에요.",
+                    questions: ["교사나 부모님이 나에게 뭔가를 시키면 부담스럽다", "친해도 가끔 만나는 것이 좋다", "좋은 것도 강요하면 안된다고 생각한다", "누구나 자유롭게 선택할 수 있도록 존중해 주어야 한다", "내가 하고 싶은 일을, 하고 싶을 때 하기 원한다", "나 혼자 있는 시간이 필요하다", "정해진 계획이 불편하다", "한 가지를 끝까지 하는 것이 어렵다", "친구의 의견이 나와 달라도 괜찮다", "계획과 다르게 진행되어도 괜찮다"]
+                },
+                fun: {
+                    name: "즐거움의 욕구",
+                    color: "bg-purple-400",
+                    description: "새로운 것을 배우고 신나게 놀고 싶은 마음이에요.",
+                    questions: ["큰소리로 웃기 좋아한다", "유머를 사용하거나 듣는 것이 즐겁다", "나 자신에 대해서 웃을 때가 있다", "새로운 것을 배우는 것이 즐겁다", "흥미있는 게임이나 놀이를 좋아한다", "여행이 좋다", "독서를 좋아한다", "영화를 즐겨본다", "호기심이 많다", "새로운 방식으로 생각해 보는 것이 즐겁다"]
+                }
             },
-            love: {
-                name: "사랑과 소속의 욕구",
-                color: "bg-blue-400",
-                description: "친구들과 사이좋게 지내고 사랑을 주고받고 싶은 마음이에요.",
-                questions: [
-                    "관심과 사랑을 받지 못하면 힘들다", "친구에 대해 궁금한 것이 많다", "친구가 도움이 필요할 때 잘 돕는다", "힘들거나 불편한 사람을 보면 도와주고 싶은 마음이 든다", "사람들과 함께 있는 것이 좋다", "친한 친구와 자주 만나고 이야기도 많이 한다", "나누어 주는 것을 좋아한다", "다른 사람이 나를 좋아해 주면 좋겠다", "친절한 편이다", "친구들과 함께 모여 놀거나 과제를 하는 것이 편하다"
-                ]
-            },
-            power: {
-                name: "힘(성취)의 욕구",
-                color: "bg-green-400",
-                description: "무언가를 잘 해내서 인정받고 싶어하는 마음이에요.",
-                questions: [
-                    "내가 한 일에 대해 인정받고 싶다", "다른 사람이나 친구가 잘못했을 때 잘못에 대해 이야기한다", "다른 사람이나 친구에게 무엇을 하라고 잘 시키는 편이다", "놀거나 뭔가를 결정할 때 내가 낸 의견으로 정해지면 좋겠다", "쉽지 않은 상황이라도 내가 원하는 것을 하고 싶다", "친구가 무리한 부탁을 할 때 거절할 수 있다", "내가 하는 일에서 최고가 되고 싶다", "모든 친구들이 내 말대로 따라주면 좋겠다", "어른도 잘못 생각할 때는 말해줘야 한다고 생각한다", "내가 해낸 것과 능력이 자랑스럽다"
-                ]
-            },
-            freedom: {
-                name: "자유의 욕구",
-                color: "bg-yellow-400",
-                description: "내 마음대로 선택하고 자유롭게 행동하고 싶은 마음이에요.",
-                questions: [
-                    "교사나 부모님이 나에게 뭔가를 시키면 부담스럽다", "친해도 가끔 만나는 것이 좋다", "좋은 것도 강요하면 안된다고 생각한다", "누구나 자유롭게 선택할 수 있도록 존중해 주어야 한다", "내가 하고 싶은 일을, 하고 싶을 때 하기 원한다", "나 혼자 있는 시간이 필요하다", "정해진 계획이 불편하다", "한 가지를 끝까지 하는 것이 어렵다", "친구의 의견이 나와 달라도 괜찮다", "계획과 다르게 진행되어도 괜찮다"
-                ]
-            },
-            fun: {
-                name: "즐거움의 욕구",
-                color: "bg-purple-400",
-                description: "새로운 것을 배우고 신나게 놀고 싶은 마음이에요.",
-                questions: [
-                    "큰소리로 웃기 좋아한다", "유머를 사용하거나 듣는 것이 즐겁다", "나 자신에 대해서 웃을 때가 있다", "새로운 것을 배우는 것이 즐겁다", "흥미있는 게임이나 놀이를 좋아한다", "여행이 좋다", "독서를 좋아한다", "영화를 즐겨본다", "호기심이 많다", "새로운 방식으로 생각해 보는 것이 즐겁다"
-                ]
+            teen: {
+                survival: {
+                    name: "생존의 욕구",
+                    color: "bg-red-400",
+                    description: "안전하고 건강하게, 미래를 준비하고 싶어하는 마음이에요.",
+                    questions: ["돈이나 물건을 절약한다", "돈으로 살 수 있는 것에 만족을 느낀다", "나의 건강에 관심을 가지고 있다", "균형 잡힌 식생활을 하려고 노력한다", "돈이 있으면 저축을 하는 편이다", "각자의 성(남자답고 싶다. 여자답고 싶다)에 관심을 가지고 있다", "상식이나 규범에서 벗어나지 않으려 한다", "부득이한 경우가 아니면 모험은 피하고 싶다", "외모가 단정해 보이는 것이 좋다", "쓸 수 있는 물건은 버리지 않고 간직한다"]
+                },
+                love: {
+                    name: "사랑과 소속의 욕구",
+                    color: "bg-blue-400",
+                    description: "주변 사람들과 좋은 관계를 맺고 사랑을 나누고 싶은 마음이에요.",
+                    questions: ["나는 사랑과 관심을 많이 필요로 한다", "다른 사람의 고민이나 상황에 관심이 있다", "친구를 위해 시간을 낸다", "새학기 처음 만난 친구에게 말을 건다", "사람들과 함께 있는 것을 좋아한다", "아는 사람과는 가깝고 친밀하게 지낸다", "선생님이 내게 관심을 가져주기 바란다", "다른 사람이 나를 좋아해 주기 바란다", "다른 사람들에게 친절하게 대한다", "부모님이 나의 모든 것을 좋아해 주기 바란다"]
+                },
+                power: {
+                    name: "힘(성취)의 욕구",
+                    color: "bg-green-400",
+                    description: "자신의 능력을 발휘하고 다른 사람에게 인정받고 싶은 마음이에요.",
+                    questions: ["내가 하는 일에서 사람들로부터 인정받고 싶다", "다른 사람이나 친구에게 충고나 조언을 잘 한다", "다른 사람이나 친구에게 무엇을 하라고 잘 시킨다", "옳다고 생각되면 주장하고 이루어내려 한다", "사람들에게 칭찬 듣는 것을 좋아한다", "친구가 무리한 부탁을 할 때 거절할 수 있다", "내가 하는 일에서 최고가 되고 싶다", "집단의 리더가 되고 싶다", "내가 속한 집단이 내가 원하는 방향으로 나아가기(변화되기) 원한다", "내가 이룬 것과 재능을 자랑스럽게 여긴다"]
+                },
+                freedom: {
+                    name: "자유의 욕구",
+                    color: "bg-yellow-400",
+                    description: "스스로 선택하고 자신의 뜻대로 행동하고 싶은 마음이에요.",
+                    questions: ["사람들이 내게 어떻게 하라고 지시하는 것이 싫다", "내가 원하지 않는 일을 하라고 하면 싫다", "다른 사람에게 어떻게 살아야 한다고 강요하면 안된다고 생각한다", "누구나 자유롭게 선택할 수 있도록 존중해 주어야 한다", "내가 하고 싶은 일을, 하고 싶을 때 하고 싶다", "다른 사람 눈치를 보지 않고 내가 하고 싶은대로 살고 싶다", "누구나 인생을 자기 뜻대로 살 권리가 있다고 믿는다", "한 가지를 오래 하는 것이 어렵다", "친구의 의견이 나와 달라도 존중한다", "계획된 일이 다르게 진행되어도 크게 상관없다"]
+                },
+                fun: {
+                    name: "즐거움의 욕구",
+                    color: "bg-purple-400",
+                    description: "새로운 경험과 배움을 통해 삶을 재미있게 만들고 싶은 마음이에요.",
+                    questions: ["큰소리로 웃기 좋아한다", "유머를 사용하거나 듣는 것이 즐겁다", "나 자신에 대해서도 웃을 때가 있다", "뭐든지 유익하거나 새로운 것을 배우는 것이 즐겁다", "흥미있는 게임이나 놀이를 좋아한다", "여행하기를 좋아한다", "독서를 좋아한다", "영화나 음악감상을 좋아한다", "호기심이 많다", "새로운 방식으로 일하거나 생각해 보는 것이 즐겁다"]
+                }
             }
         };
 
         const ratingLabels = ['전혀<br>그렇지 않다', '별로<br>그렇지 않다', '때때로<br>그렇다', '자주<br>그렇다', '언제나<br>그렇다'];
+        
+        let currentSurveyData = {};
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('needs-survey-form');
-            const startBtn = document.getElementById('start-btn');
+            const startChildBtn = document.getElementById('start-child-btn');
+            const startTeenBtn = document.getElementById('start-teen-btn');
             const submitBtn = document.getElementById('submit-btn');
             const restartBtn = document.getElementById('restart-btn');
             const saveImageBtn = document.getElementById('save-image-btn');
@@ -192,21 +234,33 @@
             
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
-
             const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+            const alertModal = document.getElementById('alert-modal');
+            const alertModalText = document.getElementById('alert-modal-text');
+            const alertModalClose = document.getElementById('alert-modal-close');
+
+            function showModal(message) {
+                alertModalText.textContent = message;
+                alertModal.classList.remove('hidden');
+            }
+            alertModalClose.addEventListener('click', () => {
+                alertModal.classList.add('hidden');
+            });
 
             function renderSurvey() {
                 let html = '<div class="space-y-8">';
                 let questionCounter = 1;
-                for (const [key, category] of Object.entries(surveyData)) {
+                const { title, ...categories } = currentSurveyData;
+                for (const [key, category] of Object.entries(categories)) {
                     category.questions.forEach((question, index) => {
                         html += `<div class="question-item border-t pt-6">
                                     <p class="text-lg text-gray-700 font-medium mb-3">${questionCounter}. ${question}</p>
-                                    <div class="flex items-center justify-around flex-wrap">`;
+                                    <div class="flex items-center justify-around flex-wrap gap-y-2">`;
                         for (let i = 1; i <= 5; i++) {
-                            html += `<label for="q_${key}_${index}_${i}" class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition">
+                            html += `<label for="q_${key}_${index}_${i}" class="flex flex-col items-center space-y-1 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition w-20 text-center">
                                         <input type="radio" id="q_${key}_${index}_${i}" name="q_${key}_${index}" value="${i}" class="custom-radio ${category.color.replace('bg-', 'before:bg-')}" required>
-                                        <span class="text-sm text-gray-600 text-center">${ratingLabels[i - 1]}</span>
+                                        <span class="text-xs text-gray-600">${ratingLabels[i - 1]}</span>
                                     </label>`;
                         }
                         html += `</div></div>`;
@@ -230,26 +284,22 @@
 
             function showResults() {
                 const formData = new FormData(form);
-                const scores = {
-                    survival: 0,
-                    love: 0,
-                    power: 0,
-                    freedom: 0,
-                    fun: 0
-                };
+                const scores = { survival: 0, love: 0, power: 0, freedom: 0, fun: 0 };
 
                 for (let [name, value] of formData.entries()) {
                     const [q, key, index] = name.split('_');
-                    scores[key] += parseInt(value);
+                    if (scores.hasOwnProperty(key)) {
+                        scores[key] += parseInt(value);
+                    }
                 }
 
+                const { title, ...categories } = currentSurveyData;
                 const resultsArray = Object.keys(scores).map(key => ({
                     key,
-                    name: surveyData[key].name,
+                    name: categories[key].name,
                     score: scores[key],
-                    color: surveyData[key].color,
-                    description: surveyData[key].description,
-                    percentage: (scores[key] / 50) * 100 // max score for each category is 50
+                    color: categories[key].color,
+                    description: categories[key].description
                 }));
 
                 resultsArray.sort((a, b) => b.score - a.score);
@@ -257,20 +307,20 @@
                 const resultsContent = document.getElementById('results-content');
                 let html = '<div class="space-y-4">';
                 resultsArray.forEach(result => {
-                    const percentage = (result.score / 50) * 100;
+                    const percentage = (result.score / 50) * 100; // max score for each category is 50
                     html += `
-                        <div class="p-4 rounded-lg border">
-                           <div class="flex items-baseline">
-                             <h3 class="text-xl font-bold text-gray-700 w-48">${result.name}</h3>
-                           </div>
-                           <p class="text-gray-600 ml-20 mb-3">${result.description}</p>
-                           <div class="flex items-center ml-20">
-                             <div class="w-full bg-gray-200 rounded-full h-8">
-                               <div class="${result.color} h-8 rounded-full flex items-center justify-end pr-3" style="width: ${percentage}%">
-                                  <span class="text-white font-bold text-lg">${result.score}점</span>
-                               </div>
-                             </div>
-                           </div>
+                        <div class="p-4 rounded-lg border bg-white">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:gap-4 mb-2">
+                                <h3 class="text-xl font-bold text-gray-800 w-full sm:w-48 shrink-0">${result.name}</h3>
+                                <p class="text-gray-600 text-sm">${result.description}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-8">
+                                    <div class="${result.color} h-8 rounded-full flex items-center justify-end pr-3" style="width: ${percentage}%">
+                                        <span class="text-white font-bold text-lg">${result.score}점</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>`;
                 });
                 html += '</div>';
@@ -282,44 +332,44 @@
                 window.scrollTo(0, 0);
             }
 
-            startBtn.addEventListener('click', () => {
+            function startSurvey(surveyType) {
                 const userName = document.getElementById('user-name').value;
                 if (userName.trim() === '') {
-                    alert('이름을 입력해주세요!');
+                    showModal('이름을 입력해주세요!');
                     return;
                 }
+                currentSurveyData = surveyDataSets[surveyType];
                 document.getElementById('survey-user-name').textContent = userName;
                 startScreen.classList.add('hidden');
                 surveyScreen.classList.remove('hidden');
                 renderSurvey();
-            });
+            }
+
+            startChildBtn.addEventListener('click', () => startSurvey('child'));
+            startTeenBtn.addEventListener('click', () => startSurvey('teen'));
 
             submitBtn.addEventListener('click', () => {
                 const allQuestionItems = form.querySelectorAll('.question-item');
                 let firstUnansweredItem = null;
 
-                // 기존에 표시된 미답변 표시를 모두 제거합니다.
                 allQuestionItems.forEach(item => {
-                    item.classList.remove('bg-red-100', 'rounded-lg', 'p-2');
+                    item.classList.remove('bg-red-50', 'rounded-lg', 'p-3', 'ring-2', 'ring-red-300');
                 });
 
-                // 모든 문항을 확인하여 답변되지 않은 문항을 찾습니다.
                 allQuestionItems.forEach(item => {
                     const isAnswered = item.querySelector('input[type="radio"]:checked');
                     if (!isAnswered) {
-                        item.classList.add('bg-red-100', 'rounded-lg', 'p-2');
+                        item.classList.add('bg-red-50', 'rounded-lg', 'p-3', 'ring-2', 'ring-red-300');
                         if (!firstUnansweredItem) {
                             firstUnansweredItem = item;
                         }
                     }
                 });
 
-                // 미답변 문항이 있으면 알림을 띄우고 해당 위치로 스크롤합니다.
                 if (firstUnansweredItem) {
-                    alert('답변하지 않은 문항이 있습니다. 붉은색으로 표시된 문항에 답변해주세요.');
+                    showModal('답변하지 않은 문항이 있습니다. 붉은색으로 표시된 문항에 답변해주세요.');
                     firstUnansweredItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
-                    // 모든 문항에 답변했으면 결과를 보여줍니다.
                     showResults();
                 }
             });
@@ -332,7 +382,7 @@
                 const resultsContainer = document.getElementById('results-container');
                  html2canvas(resultsContainer, { scale: 2 }).then(canvas => {
                     const link = document.createElement('a');
-                    link.download = 'needs_survey_result.png';
+                    link.download = `욕구강도_결과_${document.getElementById('user-name').value}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                 });
@@ -342,7 +392,7 @@
                 const { jsPDF } = window.jspdf;
                 const resultsContainer = document.getElementById('results-container');
                 
-                html2canvas(resultsContainer, { scale: 2 }).then(canvas => {
+                html2canvas(resultsContainer, { scale: 2, windowWidth: resultsContainer.scrollWidth, windowHeight: resultsContainer.scrollHeight }).then(canvas => {
                     const imgData = canvas.toDataURL('image/png');
                     const pdf = new jsPDF({
                         orientation: 'p',
@@ -350,7 +400,7 @@
                         format: [canvas.width, canvas.height]
                     });
                     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-                    pdf.save('needs_survey_result.pdf');
+                    pdf.save(`욕구강도_결과_${document.getElementById('user-name').value}.pdf`);
                 });
             });
 
