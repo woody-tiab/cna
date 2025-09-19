@@ -3,422 +3,532 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>어린이/청소년 욕구강도 검사 프로그램</title>
+    <title>인물백과 LIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        @import url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css');
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
         body {
-            font-family: 'Paperlogy', sans-serif;
+            font-family: 'Paperlogy', 'Noto Sans KR', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
         }
-        .custom-radio {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 2px solid #ddd;
-            border-radius: 50%;
+        #chatbox::-webkit-scrollbar, #character-selection-list::-webkit-scrollbar, #character-description::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chatbox::-webkit-scrollbar-track, #character-selection-list::-webkit-scrollbar-track, #character-description::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #chatbox::-webkit-scrollbar-thumb, #character-selection-list::-webkit-scrollbar-thumb, #character-description::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* slate-300 */
+            border-radius: 4px;
+        }
+        #chatbox::-webkit-scrollbar-thumb:hover, #character-selection-list::-webkit-scrollbar-thumb:hover, #character-description::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* slate-400 */
+        }
+        .message-bubble {
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        .message-bubble.user {
+            background-color: #4f46e5; /* indigo-600 */
+        }
+        .message-bubble.bot {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0; /* slate-200 */
+        }
+        .dot-flashing {
             position: relative;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.2s ease-in-out;
+            width: 8px;
+            height: 8px;
+            border-radius: 5px;
+            background-color: #64748b; /* slate-500 */
+            color: #64748b;
+            animation: dotFlashing 1s infinite linear alternate;
+            animation-delay: .5s;
         }
-        .custom-radio:checked {
-            border-color: transparent;
-        }
-        .custom-radio:before {
+        .dot-flashing::before, .dot-flashing::after {
             content: '';
+            display: inline-block;
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background-color: var(--radio-color);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.2s ease-in-out;
+            top: 0;
         }
-        .custom-radio:checked:before {
-            width: 1.5rem;
-            height: 1.5rem;
+        .dot-flashing::before {
+            left: -12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 5px;
+            background-color: #64748b;
+            color: #64748b;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 0s;
         }
-        .custom-radio.before\:bg-red-400:before { --radio-color: #f87171; }
-        .custom-radio.before\:bg-blue-400:before { --radio-color: #60a5fa; }
-        .custom-radio.before\:bg-green-400:before { --radio-color: #4ade80; }
-        .custom-radio.before\:bg-yellow-400:before { --radio-color: #facc15; }
-        .custom-radio.before\:bg-purple-400:before { --radio-color: #a78bfa; }
-
-        .progress-bar-inner {
-            transition: width 0.3s ease-in-out;
+        .dot-flashing::after {
+            left: 12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 5px;
+            background-color: #64748b;
+            color: #64748b;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 1s;
         }
-
-        #scrollToTopBtn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #4f46e5;
-            color: white;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transition: opacity 0.3s, visibility 0.3s;
+        @keyframes dotFlashing {
+            0% { background-color: #64748b; }
+            50%, 100% { background-color: #cbd5e1; }
+        }
+        .screen-bg {
+            background-color: #f8fafc; /* slate-50 */
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 1.5rem 1.5rem;
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="flex items-center justify-center h-screen p-4 bg-slate-100">
 
-    <!-- Start Screen -->
-    <div id="start-screen" class="min-h-screen flex flex-col items-center justify-center p-4">
-        <div class="text-center bg-white p-8 rounded-2xl shadow-lg max-w-2xl w-full">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">나의 욕구강도 프로파일</h1>
-            <p class="text-gray-600 mb-6">자신의 마음에 대해 알아보는 시간이에요!<br>아래 질문들을 읽고 자신에게 가장 가깝다고 생각하는 것을 골라주세요.</p>
-            <input type="text" id="user-name" class="w-full max-w-sm border-2 border-gray-200 p-3 rounded-lg text-lg mb-6 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="이름을 입력해주세요">
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                 <button id="start-child-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md">어린이용 검사 시작! ✨</button>
-                 <button id="start-teen-btn" class="bg-teal-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-teal-700 transition-colors duration-300 shadow-md">청소년용 검사 시작! 🚀</button>
+    <div class="w-full max-w-5xl h-full flex flex-col bg-white shadow-2xl rounded-2xl border border-slate-200">
+        <!-- 초기 화면 -->
+        <div id="initial-screen" class="flex flex-col items-center justify-center h-full p-8 text-center screen-bg rounded-2xl">
+            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500 mb-6 opacity-80"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-3 tracking-tight">인물백과 LIVE</h1>
+            <p class="text-slate-600 text-base sm:text-lg mb-8">대화하고 싶은 인물의 이름을 입력하고 대화를 시작하세요.</p>
+            <div class="w-full max-w-md">
+                <input type="text" id="characterInput" class="w-full text-base px-4 py-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mb-4" placeholder="예: 세종대왕, 이순신, 아인슈타인...">
+                <button id="startButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">인물 검색</button>
             </div>
-            <p class="text-xs text-gray-400 mt-8">원본 출처: <a href="https://eduhope88.tistory.com/521" target="_blank" class="underline">https://eduhope88.tistory.com/521</a></p>
         </div>
-    </div>
+        
+        <!-- 인물 선택 화면 -->
+        <div id="selection-screen" class="hidden flex flex-col items-center justify-center h-full p-4 sm:p-8 screen-bg rounded-2xl">
+            <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-3 tracking-tight">대화할 인물을 선택해주세요</h2>
+            <p class="text-slate-600 text-base sm:text-lg mb-8">입력하신 이름으로 여러 인물이 검색되었습니다.</p>
+            <div id="character-selection-list" class="w-full max-w-3xl border border-slate-200 rounded-lg overflow-y-auto max-h-[50vh] sm:max-h-80 bg-white">
+                <!-- 후보 리스트가 여기에 추가됩니다. -->
+            </div>
+             <button id="backButton" class="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-base">뒤로가기</button>
+        </div>
 
-    <!-- Survey Screen -->
-    <div id="survey-screen" class="hidden container mx-auto p-4 md:p-8 max-w-4xl">
-        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800"><span id="survey-user-name"></span>의 마음 알아보기</h2>
+        <!-- 채팅 화면 -->
+        <div id="chat-screen" class="hidden flex flex-col sm:flex-row h-full rounded-2xl overflow-hidden">
+            <!-- 왼쪽 인물 정보 패널 -->
+            <div class="w-full sm:w-1/3 p-6 flex flex-col items-center justify-start border-b sm:border-b-0 sm:border-r border-slate-200 screen-bg">
+                <div class="w-full text-center pt-4 sm:pt-0">
+                    <img id="character-image" src="" alt="초상화" class="hidden w-36 h-36 sm:w-48 sm:h-48 rounded-full object-cover border-4 border-white shadow-lg mb-5 bg-slate-200 mx-auto ring-4 ring-slate-200">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" id="character-name-display"></h2>
+                    <a id="wikiLink" href="#" target="_blank" class="hidden mt-3 inline-flex items-center gap-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold py-1 px-3 rounded-full text-xs transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        위키피디아 바로가기
+                    </a>
+                    <p id="character-description" class="text-base text-slate-600 mt-3 max-h-56 sm:max-h-72 overflow-y-auto leading-relaxed"></p>
+                </div>
             </div>
             
-            <div class="sticky top-0 bg-white py-4 z-10 shadow-sm mb-4">
-                 <div class="flex justify-between items-center mb-1">
-                     <span class="text-sm font-medium text-indigo-700">진행도</span>
-                     <span id="progress-text" class="text-sm font-medium text-indigo-700">0 / 50</span>
-                 </div>
-                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                     <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
-                 </div>
-            </div>
+            <!-- 오른쪽 채팅 패널 -->
+            <div class="w-full sm:w-2/3 flex flex-col h-full bg-white">
+                <!-- 헤더 -->
+                <div class="flex items-center justify-between p-3 border-b border-slate-200 bg-white">
+                    <p class="text-sm text-slate-500 pl-2">※ 본 대화는 AI가 생성한 가상 답변입니다.</p>
+                    <button id="restartButton" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200">새 대화 시작</button>
+                </div>
+                
+                <div id="chatbox" class="flex-1 p-4 sm:p-6 overflow-y-auto bg-slate-100"></div>
 
-            <form id="needs-survey-form">
-                <!-- Questions will be dynamically inserted here -->
-            </form>
-            <div class="text-center mt-10">
-                <button type="button" id="submit-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-indigo-700 transition-colors duration-300 shadow-md">결과 보기 🚀</button>
+                <div class="p-4 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
+                    <div class="flex items-center space-x-3">
+                        <input type="text" id="userInput" class="flex-1 w-full px-4 py-3 text-base border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="질문을 입력하세요...">
+                        <button id="sendButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-full shadow-md transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Results Screen -->
-    <div id="results-screen" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div id="results-container" class="bg-white rounded-2xl shadow-lg p-6 md:p-10 max-w-4xl w-full">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800"><span id="result-user-name"></span>의 욕구강도 결과</h2>
-                <p class="text-gray-600 mt-2">나의 마음 속 강한 욕구는 무엇일까요?</p>
-            </div>
-            <div id="results-content" class="space-y-6">
-                <!-- Results will be dynamically inserted here -->
-            </div>
-            <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
-                <button id="save-image-btn" class="w-full sm:w-auto bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors duration-300">이미지로 저장</button>
-                <button id="save-pdf-btn" class="w-full sm:w-auto bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition-colors duration-300">PDF로 저장</button>
-                <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors duration-300">다시하기</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Custom Alert Modal -->
-    <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
-            <p id="alert-modal-text" class="mb-4 text-lg text-gray-700"></p>
-            <button id="alert-modal-close" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">확인</button>
-        </div>
-    </div>
-
-    <!-- Scroll to top button -->
-    <button id="scrollToTopBtn" title="맨 위로 이동">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-        </svg>
-    </button>
-
 
     <script>
-        const surveyDataSets = {
-            child: {
-                survival: {
-                    name: "생존의 욕구",
-                    color: "bg-red-400",
-                    description: "안전하고 건강하게 지내고 싶어하는 마음이에요.",
-                    questions: ["돈을 아껴쓴다", "돈이 생기면 모으거나 저축한다", "몸이 아프면 낫기 위해 열심히 노력한다", "밥 먹을 때는 골고루 먹으려고 한다", "학교의 규칙을 지키는 것이 편하다", "선생님이나 부모님이 싫어할 만한 일은 하지 않는다", "하던 대로 하는 것이 편하다", "위험해 보이는 일은 하지 않는다", "옷이나 머리를 깔끔하게 하는 것이 좋다", "쓸 수 있는 물건은 버리지 않고 간직한다"]
-                },
-                love: {
-                    name: "사랑과 소속의 욕구",
-                    color: "bg-blue-400",
-                    description: "친구들과 사이좋게 지내고 사랑을 주고받고 싶은 마음이에요.",
-                    questions: ["관심과 사랑을 받지 못하면 힘들다", "친구에 대해 궁금한 것이 많다", "친구가 도움이 필요할 때 잘 돕는다", "힘들거나 불편한 사람을 보면 도와주고 싶은 마음이 든다", "사람들과 함께 있는 것이 좋다", "친한 친구와 자주 만나고 이야기도 많이 한다", "나누어 주는 것을 좋아한다", "다른 사람이 나를 좋아해 주면 좋겠다", "친절한 편이다", "친구들과 함께 모여 놀거나 과제를 하는 것이 편하다"]
-                },
-                power: {
-                    name: "힘(성취)의 욕구",
-                    color: "bg-green-400",
-                    description: "무언가를 잘 해내서 인정받고 싶어하는 마음이에요.",
-                    questions: ["내가 한 일에 대해 인정받고 싶다", "다른 사람이나 친구가 잘못했을 때 잘못에 대해 이야기한다", "다른 사람이나 친구에게 무엇을 하라고 잘 시키는 편이다", "놀거나 뭔가를 결정할 때 내가 낸 의견으로 정해지면 좋겠다", "쉽지 않은 상황이라도 내가 원하는 것을 하고 싶다", "친구가 무리한 부탁을 할 때 거절할 수 있다", "내가 하는 일에서 최고가 되고 싶다", "모든 친구들이 내 말대로 따라주면 좋겠다", "어른도 잘못 생각할 때는 말해줘야 한다고 생각한다", "내가 해낸 것과 능력이 자랑스럽다"]
-                },
-                freedom: {
-                    name: "자유의 욕구",
-                    color: "bg-yellow-400",
-                    description: "내 마음대로 선택하고 자유롭게 행동하고 싶은 마음이에요.",
-                    questions: ["교사나 부모님이 나에게 뭔가를 시키면 부담스럽다", "친해도 가끔 만나는 것이 좋다", "좋은 것도 강요하면 안된다고 생각한다", "누구나 자유롭게 선택할 수 있도록 존중해 주어야 한다", "내가 하고 싶은 일을, 하고 싶을 때 하기 원한다", "나 혼자 있는 시간이 필요하다", "정해진 계획이 불편하다", "한 가지를 끝까지 하는 것이 어렵다", "친구의 의견이 나와 달라도 괜찮다", "계획과 다르게 진행되어도 괜찮다"]
-                },
-                fun: {
-                    name: "즐거움의 욕구",
-                    color: "bg-purple-400",
-                    description: "새로운 것을 배우고 신나게 놀고 싶은 마음이에요.",
-                    questions: ["큰소리로 웃기 좋아한다", "유머를 사용하거나 듣는 것이 즐겁다", "나 자신에 대해서 웃을 때가 있다", "새로운 것을 배우는 것이 즐겁다", "흥미있는 게임이나 놀이를 좋아한다", "여행이 좋다", "독서를 좋아한다", "영화를 즐겨본다", "호기심이 많다", "새로운 방식으로 생각해 보는 것이 즐겁다"]
-                }
-            },
-            teen: {
-                survival: {
-                    name: "생존의 욕구",
-                    color: "bg-red-400",
-                    description: "안전하고 건강하게, 미래를 준비하고 싶어하는 마음이에요.",
-                    questions: ["돈이나 물건을 절약한다", "돈으로 살 수 있는 것에 만족을 느낀다", "나의 건강에 관심을 가지고 있다", "균형 잡힌 식생활을 하려고 노력한다", "돈이 있으면 저축을 하는 편이다", "각자의 성(남자답고 싶다. 여자답고 싶다)에 관심을 가지고 있다", "상식이나 규범에서 벗어나지 않으려 한다", "부득이한 경우가 아니면 모험은 피하고 싶다", "외모가 단정해 보이는 것이 좋다", "쓸 수 있는 물건은 버리지 않고 간직한다"]
-                },
-                love: {
-                    name: "사랑과 소속의 욕구",
-                    color: "bg-blue-400",
-                    description: "주변 사람들과 좋은 관계를 맺고 사랑을 나누고 싶은 마음이에요.",
-                    questions: ["나는 사랑과 관심을 많이 필요로 한다", "다른 사람의 고민이나 상황에 관심이 있다", "친구를 위해 시간을 낸다", "새학기 처음 만난 친구에게 말을 건다", "사람들과 함께 있는 것을 좋아한다", "아는 사람과는 가깝고 친밀하게 지낸다", "선생님이 내게 관심을 가져주기 바란다", "다른 사람이 나를 좋아해 주기 바란다", "다른 사람들에게 친절하게 대한다", "부모님이 나의 모든 것을 좋아해 주기 바란다"]
-                },
-                power: {
-                    name: "힘(성취)의 욕구",
-                    color: "bg-green-400",
-                    description: "자신의 능력을 발휘하고 다른 사람에게 인정받고 싶은 마음이에요.",
-                    questions: ["내가 하는 일에서 사람들로부터 인정받고 싶다", "다른 사람이나 친구에게 충고나 조언을 잘 한다", "다른 사람이나 친구에게 무엇을 하라고 잘 시킨다", "옳다고 생각되면 주장하고 이루어내려 한다", "사람들에게 칭찬 듣는 것을 좋아한다", "친구가 무리한 부탁을 할 때 거절할 수 있다", "내가 하는 일에서 최고가 되고 싶다", "집단의 리더가 되고 싶다", "내가 속한 집단이 내가 원하는 방향으로 나아가기(변화되기) 원한다", "내가 이룬 것과 재능을 자랑스럽게 여긴다"]
-                },
-                freedom: {
-                    name: "자유의 욕구",
-                    color: "bg-yellow-400",
-                    description: "스스로 선택하고 자신의 뜻대로 행동하고 싶은 마음이에요.",
-                    questions: ["사람들이 내게 어떻게 하라고 지시하는 것이 싫다", "내가 원하지 않는 일을 하라고 하면 싫다", "다른 사람에게 어떻게 살아야 한다고 강요하면 안된다고 생각한다", "누구나 자유롭게 선택할 수 있도록 존중해 주어야 한다", "내가 하고 싶은 일을, 하고 싶을 때 하고 싶다", "다른 사람 눈치를 보지 않고 내가 하고 싶은대로 살고 싶다", "누구나 인생을 자기 뜻대로 살 권리가 있다고 믿는다", "한 가지를 오래 하는 것이 어렵다", "친구의 의견이 나와 달라도 존중한다", "계획된 일이 다르게 진행되어도 크게 상관없다"]
-                },
-                fun: {
-                    name: "즐거움의 욕구",
-                    color: "bg-purple-400",
-                    description: "새로운 경험과 배움을 통해 삶을 재미있게 만들고 싶은 마음이에요.",
-                    questions: ["큰소리로 웃기 좋아한다", "유머를 사용하거나 듣는 것이 즐겁다", "나 자신에 대해서도 웃을 때가 있다", "뭐든지 유익하거나 새로운 것을 배우는 것이 즐겁다", "흥미있는 게임이나 놀이를 좋아한다", "여행하기를 좋아한다", "독서를 좋아한다", "영화나 음악감상을 좋아한다", "호기심이 많다", "새로운 방식으로 일하거나 생각해 보는 것이 즐겁다"]
+        const initialScreen = document.getElementById('initial-screen');
+        const selectionScreen = document.getElementById('selection-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const characterInput = document.getElementById('characterInput');
+        const startButton = document.getElementById('startButton');
+        const backButton = document.getElementById('backButton');
+        const characterSelectionList = document.getElementById('character-selection-list');
+        const chatbox = document.getElementById('chatbox');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const restartButton = document.getElementById('restartButton');
+        const characterNameDisplay = document.getElementById('character-name-display');
+        const characterImage = document.getElementById('character-image');
+        const characterDescription = document.getElementById('character-description');
+        const wikiLink = document.getElementById('wikiLink');
+
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        
+        const emojiPlaceholder = 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="%23e2e8f0"/><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-size="60">😊</text></svg>';
+
+        let chatHistory = [];
+        let systemPrompt = "";
+        let characterName = ""; // This will store the full original name for API calls
+
+        const cleanName = (name) => {
+            return name.split('(')[0].trim();
+        };
+
+        const cleanMarkdown = (text) => {
+            if (!text) return '';
+            // Removes markdown characters like *, **, #, etc.
+            return text.replace(/([_*#`~])/g, '');
+        };
+
+        const fetchWithRetry = async (url, options, retries = 3, delay = 500) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response;
+                } catch (error) {
+                    console.error(`Fetch attempt ${i + 1} for ${url} failed. Retrying in ${delay}ms...`, error);
+                    if (i < retries - 1) {
+                        await new Promise(res => setTimeout(res, delay));
+                        delay *= 2; // Exponential backoff
+                    } else {
+                        throw error; // Rethrow the last error
+                    }
                 }
             }
         };
 
-        const ratingLabels = ['전혀<br>그렇지 않다', '별로<br>그렇지 않다', '때때로<br>그렇다', '자주<br>그렇다', '언제나<br>그렇다'];
-        
-        let currentSurveyData = {};
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('needs-survey-form');
-            const startChildBtn = document.getElementById('start-child-btn');
-            const startTeenBtn = document.getElementById('start-teen-btn');
-            const submitBtn = document.getElementById('submit-btn');
-            const restartBtn = document.getElementById('restart-btn');
-            const saveImageBtn = document.getElementById('save-image-btn');
-            const savePdfBtn = document.getElementById('save-pdf-btn');
-
-            const startScreen = document.getElementById('start-screen');
-            const surveyScreen = document.getElementById('survey-screen');
-            const resultsScreen = document.getElementById('results-screen');
-            
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-            const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-
-            const alertModal = document.getElementById('alert-modal');
-            const alertModalText = document.getElementById('alert-modal-text');
-            const alertModalClose = document.getElementById('alert-modal-close');
-
-            function showModal(message) {
-                alertModalText.textContent = message;
-                alertModal.classList.remove('hidden');
-            }
-            alertModalClose.addEventListener('click', () => {
-                alertModal.classList.add('hidden');
-            });
-
-            function renderSurvey() {
-                let html = '<div class="space-y-8">';
-                let questionCounter = 1;
-                const { title, ...categories } = currentSurveyData;
-                for (const [key, category] of Object.entries(categories)) {
-                    category.questions.forEach((question, index) => {
-                        html += `<div class="question-item border-t pt-6">
-                                    <p class="text-lg text-gray-700 font-medium mb-3">${questionCounter}. ${question}</p>
-                                    <div class="flex items-center justify-around flex-wrap gap-y-2">`;
-                        for (let i = 1; i <= 5; i++) {
-                            html += `<label for="q_${key}_${index}_${i}" class="flex flex-col items-center space-y-1 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition w-20 text-center">
-                                        <input type="radio" id="q_${key}_${index}_${i}" name="q_${key}_${index}" value="${i}" class="custom-radio ${category.color.replace('bg-', 'before:bg-')}" required>
-                                        <span class="text-xs text-gray-600">${ratingLabels[i - 1]}</span>
-                                    </label>`;
-                        }
-                        html += `</div></div>`;
-                        questionCounter++;
-                    });
-                }
-                html += '</div>';
-                form.innerHTML = html;
+        window.addEventListener('load', async () => {
+            const savedData = sessionStorage.getItem('chatData');
+            if (savedData) {
+                const { savedCharacterName, savedSystemPrompt, savedChatHistory } = JSON.parse(savedData);
+                characterName = savedCharacterName;
+                systemPrompt = savedSystemPrompt;
+                chatHistory = savedChatHistory;
                 
-                form.addEventListener('change', updateProgress);
-            }
-            
-            function updateProgress() {
-                const totalQuestions = 50;
-                const answeredQuestions = form.querySelectorAll('input[type="radio"]:checked').length;
-                const percentage = (answeredQuestions / totalQuestions) * 100;
+                initialScreen.classList.add('hidden');
+                chatScreen.classList.remove('hidden');
+
+                chatHistory.forEach(message => {
+                    addMessageToChatbox(message.role === 'user' ? 'user' : 'bot', message.parts[0].text);
+                });
                 
-                progressBar.style.width = `${percentage}%`;
-                progressText.textContent = `${answeredQuestions} / ${totalQuestions}`;
-            }
-
-            function showResults() {
-                const formData = new FormData(form);
-                const scores = { survival: 0, love: 0, power: 0, freedom: 0, fun: 0 };
-
-                for (let [name, value] of formData.entries()) {
-                    const [q, key, index] = name.split('_');
-                    if (scores.hasOwnProperty(key)) {
-                        scores[key] += parseInt(value);
-                    }
-                }
-
-                const { title, ...categories } = currentSurveyData;
-                const resultsArray = Object.keys(scores).map(key => ({
-                    key,
-                    name: categories[key].name,
-                    score: scores[key],
-                    color: categories[key].color,
-                    description: categories[key].description
-                }));
-
-                resultsArray.sort((a, b) => b.score - a.score);
-
-                const resultsContent = document.getElementById('results-content');
-                let html = '<div class="space-y-4">';
-                resultsArray.forEach(result => {
-                    const percentage = (result.score / 50) * 100; // max score for each category is 50
-                    html += `
-                        <div class="p-4 rounded-lg border bg-white">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:gap-4 mb-2">
-                                <h3 class="text-xl font-bold text-gray-800 w-full sm:w-48 shrink-0">${result.name}</h3>
-                                <p class="text-gray-600 text-sm">${result.description}</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-full bg-gray-200 rounded-full h-8">
-                                    <div class="${result.color} h-8 rounded-full flex items-center justify-end pr-3" style="width: ${percentage}%">
-                                        <span class="text-white font-bold text-lg">${result.score}점</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-                html += '</div>';
-
-                resultsContent.innerHTML = html;
-                document.getElementById('result-user-name').textContent = document.getElementById('user-name').value;
-                surveyScreen.classList.add('hidden');
-                resultsScreen.classList.remove('hidden');
-                window.scrollTo(0, 0);
-            }
-
-            function startSurvey(surveyType) {
-                const userName = document.getElementById('user-name').value;
-                if (userName.trim() === '') {
-                    showModal('이름을 입력해주세요!');
-                    return;
-                }
-                currentSurveyData = surveyDataSets[surveyType];
-                document.getElementById('survey-user-name').textContent = userName;
-                startScreen.classList.add('hidden');
-                surveyScreen.classList.remove('hidden');
-                renderSurvey();
-            }
-
-            startChildBtn.addEventListener('click', () => startSurvey('child'));
-            startTeenBtn.addEventListener('click', () => startSurvey('teen'));
-
-            submitBtn.addEventListener('click', () => {
-                const allQuestionItems = form.querySelectorAll('.question-item');
-                let firstUnansweredItem = null;
-
-                allQuestionItems.forEach(item => {
-                    item.classList.remove('bg-red-50', 'rounded-lg', 'p-3', 'ring-2', 'ring-red-300');
-                });
-
-                allQuestionItems.forEach(item => {
-                    const isAnswered = item.querySelector('input[type="radio"]:checked');
-                    if (!isAnswered) {
-                        item.classList.add('bg-red-50', 'rounded-lg', 'p-3', 'ring-2', 'ring-red-300');
-                        if (!firstUnansweredItem) {
-                            firstUnansweredItem = item;
-                        }
-                    }
-                });
-
-                if (firstUnansweredItem) {
-                    showModal('답변하지 않은 문항이 있습니다. 붉은색으로 표시된 문항에 답변해주세요.');
-                    firstUnansweredItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else {
-                    showResults();
-                }
-            });
-
-            restartBtn.addEventListener('click', () => {
-                location.reload();
-            });
-
-            saveImageBtn.addEventListener('click', () => {
-                const resultsContainer = document.getElementById('results-container');
-                 html2canvas(resultsContainer, { scale: 2 }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `욕구강도_결과_${document.getElementById('user-name').value}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                });
-            });
-
-            savePdfBtn.addEventListener('click', () => {
-                const { jsPDF } = window.jspdf;
-                const resultsContainer = document.getElementById('results-container');
+                // Call fetchCharacterDetails but we don't need to await it here
+                // because the system prompt is already saved.
+                fetchCharacterDetails(characterName);
                 
-                html2canvas(resultsContainer, { scale: 2, windowWidth: resultsContainer.scrollWidth, windowHeight: resultsContainer.scrollHeight }).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const pdf = new jsPDF({
-                        orientation: 'p',
-                        unit: 'px',
-                        format: [canvas.width, canvas.height]
-                    });
-                    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-                    pdf.save(`욕구강도_결과_${document.getElementById('user-name').value}.pdf`);
-                });
-            });
-
-            window.addEventListener('scroll', () => {
-                if (window.pageYOffset > 200) {
-                    scrollToTopBtn.style.display = 'block';
-                } else {
-                    scrollToTopBtn.style.display = 'none';
-                }
-            });
-
-            scrollToTopBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-
+                autoScroll();
+            }
         });
-    </script>
 
+        const searchForCharacter = async () => {
+            const query = characterInput.value.trim();
+            if (!query) {
+                alert('인물의 이름을 입력해주세요.');
+                return;
+            }
+            
+            const searchEndpoint = `https://ko.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=5&srprop=snippet&format=json&origin=*`;
+            try {
+                const response = await fetchWithRetry(searchEndpoint);
+                const data = await response.json();
+                const searchResults = data.query.search;
+
+                if (searchResults.length === 0) {
+                    alert('해당 인물을 찾을 수 없습니다. 다른 이름으로 검색해보세요.');
+                } else if (searchResults.length === 1 && cleanName(searchResults[0].title).toLowerCase() === query.toLowerCase()) {
+                    initiateChat(searchResults[0].title);
+                } else {
+                    displayCharacterChoices(searchResults);
+                }
+            } catch (error) {
+                console.error('Error searching Wikipedia:', error);
+                alert('인물 검색 중 오류가 발생했습니다.');
+            }
+        };
+
+        const displayCharacterChoices = (choices) => {
+            characterSelectionList.innerHTML = '';
+            initialScreen.classList.add('hidden');
+            selectionScreen.classList.remove('hidden');
+
+            choices.forEach(async choice => {
+                const choiceElement = document.createElement('div');
+                choiceElement.className = 'p-4 sm:p-5 hover:bg-slate-100 cursor-pointer border-b border-slate-200 last:border-b-0 text-left transition-colors duration-200 flex items-center gap-4';
+                
+                const img = document.createElement('img');
+                img.className = 'w-16 h-16 rounded-full object-cover bg-slate-300 flex-shrink-0';
+                
+                img.src = emojiPlaceholder;
+                img.alt = choice.title;
+                img.onerror = () => { img.src = emojiPlaceholder; img.onerror = null; };
+
+                const textWrapper = document.createElement('div');
+
+                const title = document.createElement('h3');
+                title.className = 'font-semibold text-base sm:text-lg text-slate-800';
+                title.textContent = cleanName(choice.title);
+
+                const description = document.createElement('p');
+                description.className = 'text-sm text-slate-600 mt-1';
+                
+                let snippetText = choice.snippet.replace(/<[^>]*>/g, '').trim();
+                const firstSentenceEnd = snippetText.indexOf('. ');
+                if (firstSentenceEnd !== -1) {
+                    const secondSentenceEnd = snippetText.indexOf('. ', firstSentenceEnd + 1);
+                    if (secondSentenceEnd !== -1) {
+                        snippetText = snippetText.substring(0, secondSentenceEnd + 1);
+                    } else {
+                        snippetText = snippetText.substring(0, firstSentenceEnd + 1);
+                    }
+                } else {
+                    snippetText = snippetText.length > 120 ? snippetText.substring(0, 120) + '...' : snippetText;
+                }
+                description.textContent = snippetText;
+
+
+                textWrapper.appendChild(title);
+                textWrapper.appendChild(description);
+                
+                choiceElement.appendChild(img);
+                choiceElement.appendChild(textWrapper);
+                
+                choiceElement.addEventListener('click', () => initiateChat(choice.title));
+                characterSelectionList.appendChild(choiceElement);
+
+                try {
+                    const endpoint = `https://ko.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&pithumbsize=100&titles=${encodeURIComponent(choice.title)}&origin=*`;
+                    const response = await fetchWithRetry(endpoint);
+                    const data = await response.json();
+                    const page = Object.values(data.query.pages)[0];
+                    if (page.thumbnail) {
+                        img.src = page.thumbnail.source;
+                    }
+                } catch (error) {
+                    console.error(`Error fetching thumbnail for ${choice.title}:`, error);
+                }
+            });
+        };
+
+        const fetchCharacterDetails = async (originalName) => {
+            const endpoint = `https://ko.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages|extracts&pithumbsize=300&titles=${encodeURIComponent(originalName)}&exintro=true&explaintext=true&origin=*`;
+            let pageExtract = '이 인물에 대한 간략한 소개를 찾을 수 없습니다.'; 
+
+            try {
+                characterNameDisplay.textContent = cleanName(originalName);
+                characterDescription.textContent = '요약 정보를 생성 중입니다...';
+                
+                const wikiUrl = `https://ko.wikipedia.org/wiki/${encodeURIComponent(originalName)}`;
+                wikiLink.href = wikiUrl;
+                wikiLink.classList.remove('hidden');
+
+                characterImage.src = emojiPlaceholder;
+                characterImage.classList.remove('hidden');
+
+                const response = await fetchWithRetry(endpoint);
+                const data = await response.json();
+                const page = Object.values(data.query.pages)[0];
+                
+                if (page.extract) {
+                    pageExtract = page.extract;
+                }
+
+                if (page.thumbnail) {
+                    characterImage.src = page.thumbnail.source;
+                }
+
+                try {
+                    const summaryPrompt = `다음 텍스트를 학생이 이해하기 쉽도록 가장 중요한 내용 위주로 스크롤이 생기지 않을 정도의 간결한 한 문단으로 요약해줘. 절대로 마크다운 서식을 사용하지 마:\n\n${pageExtract}`;
+                    const summaryPayload = { contents: [{ parts: [{ text: summaryPrompt }] }] };
+                    
+                    const summaryResponse = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(summaryPayload)
+                    });
+
+                    if (summaryResponse.ok) {
+                        const summaryResult = await summaryResponse.json();
+                        if (summaryResult.candidates && summaryResult.candidates[0].content.parts[0].text) {
+                             let summaryText = summaryResult.candidates[0].content.parts[0].text;
+                             characterDescription.textContent = cleanMarkdown(summaryText);
+                        }
+                    } else {
+                         const snippet = pageExtract.length > 150 ? pageExtract.substring(0, 150) + '...' : pageExtract;
+                         characterDescription.textContent = snippet;
+                    }
+                } catch (summaryError) {
+                     console.error('AI 요약 중 오류 발생, 일부 원문을 표시합니다:', summaryError);
+                     const snippet = pageExtract.length > 150 ? pageExtract.substring(0, 150) + '...' : pageExtract;
+                     characterDescription.textContent = snippet;
+                }
+
+                return pageExtract; // Return the full text for system prompt
+
+            } catch (error) {
+                console.error('인물 정보 로딩 중 오류 발생:', error);
+                characterDescription.textContent = '정보를 불러오는 데 실패했습니다.';
+                return pageExtract;
+            } finally {
+                characterImage.onerror = () => {
+                    characterImage.src = emojiPlaceholder;
+                    characterImage.onerror = null;
+                };
+            }
+        };
+
+        const setupSystemPromptAndDetails = async (originalName) => {
+            const pageExtract = await fetchCharacterDetails(originalName);
+            const currentDate = new Date().toLocaleDateString('ko-KR');
+
+            systemPrompt = `현재 날짜는 ${currentDate}입니다. 당신의 정체성은 '${originalName}'입니다. 당신의 모든 답변은 아래 제공된 최신 위키피디아 정보를 가장 중요한 핵심 참고 자료로 사용해야 합니다. 이 정보에 없는 내용은 당신의 기존 지식을 활용하여 자연스럽게 답변하되, 위키피디아 내용과 충돌해서는 안 됩니다.
+
+--- 제공된 위키피디아 정보 ---
+${pageExtract}
+--- 정보 끝 ---
+
+사용자는 여러 동명이인 중에서 당신을 선택했으므로 다른 인물과 혼동하지 마세요. 당신의 생애, 업적, 가치관에 대해 1인칭 시점으로 답변해주세요. 학생이 이해하기 쉽도록 친절하게 설명하되, 역사적 사실에 기반해야 합니다. 답변은 항상 한국어로, 그리고 간결하게 2~3문장 내외로 답변해주세요. 절대로, 어떠한 경우에도 답변에 '**', '*', '#'와 같은 마크다운 서식을 사용해서는 안됩니다. 답변은 무조건 순수 텍스트(Plain Text)여야 합니다.`;
+
+            saveToSession(); // Re-save with the full prompt
+        };
+
+        const initiateChat = (originalName) => {
+            characterName = originalName; 
+            selectionScreen.classList.add('hidden');
+            initialScreen.classList.add('hidden');
+            chatScreen.classList.remove('hidden');
+            
+            chatbox.innerHTML = ''; 
+            
+            const displayName = cleanName(originalName);
+            const firstMessageText = `안녕하세요, 저는 ${displayName}입니다. 무엇이 궁금하신가요?`;
+            const firstMessage = { role: 'model', parts: [{ text: firstMessageText }] };
+            chatHistory = [firstMessage];
+            
+            addMessageToChatbox('bot', firstMessageText);
+            
+            // Set up details and the full system prompt in the background
+            setupSystemPromptAndDetails(originalName);
+            
+            saveToSession(); // Save initial state
+        };
+
+        const sendMessage = async () => {
+            const messageText = userInput.value.trim();
+            if (!messageText) return;
+            addMessageToChatbox('user', messageText);
+            userInput.value = '';
+            chatHistory.push({ role: 'user', parts: [{ text: messageText }] });
+            saveToSession();
+            addLoadingIndicator();
+            try {
+                const response = await getGeminiResponse();
+                removeLoadingIndicator();
+                let botMessageText = response.candidates[0].content.parts[0].text;
+                botMessageText = cleanMarkdown(botMessageText); // Clean the response
+                addMessageToChatbox('bot', botMessageText);
+                chatHistory.push({ role: 'model', parts: [{ text: botMessageText }] });
+                saveToSession();
+            } catch (error) {
+                console.error('API 호출 오류:', error);
+                removeLoadingIndicator();
+                addMessageToChatbox('bot', '죄송합니다. 답변을 생성하는 중에 문제가 발생했습니다.');
+            }
+        };
+        
+        const getGeminiResponse = async (retries = 3, delay = 1000) => {
+             const payload = { contents: chatHistory, systemInstruction: { parts: [{ text: systemPrompt }] } };
+             for (let i = 0; i< retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed. Retrying in ${delay}ms...`, error);
+                    if (i < retries - 1) {
+                        await new Promise(res => setTimeout(res, delay));
+                        delay *= 2;
+                    } else throw error;
+                }
+            }
+        };
+
+        const addMessageToChatbox = (sender, message) => {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `flex mb-4 ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            const messageBubble = document.createElement('div');
+            messageBubble.className = `message-bubble rounded-xl py-2 px-4 shadow-sm ${sender === 'user' ? 'user text-white' : 'bot text-slate-800'}`;
+            messageBubble.textContent = message;
+            messageWrapper.appendChild(messageBubble);
+            chatbox.appendChild(messageWrapper);
+            autoScroll();
+        };
+        
+        const addLoadingIndicator = () => {
+            const loadingWrapper = document.createElement('div');
+            loadingWrapper.id = 'loading-indicator';
+            loadingWrapper.className = 'flex justify-start mb-4';
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble bot rounded-xl p-4 shadow-sm flex items-center justify-center';
+            const dots = document.createElement('div');
+            dots.className = 'dot-flashing';
+            bubble.appendChild(dots);
+            loadingWrapper.appendChild(bubble);
+            chatbox.appendChild(loadingWrapper);
+            autoScroll();
+        };
+
+        const removeLoadingIndicator = () => {
+            const indicator = document.getElementById('loading-indicator');
+            if (indicator) indicator.remove();
+        };
+        
+        const autoScroll = () => { chatbox.scrollTop = chatbox.scrollHeight; };
+        
+        const restartChat = () => {
+            sessionStorage.removeItem('chatData');
+            chatHistory = [];
+            systemPrompt = "";
+            characterName = "";
+            chatbox.innerHTML = '';
+            characterInput.value = '';
+            characterImage.classList.add('hidden');
+            characterImage.src = '';
+            wikiLink.classList.add('hidden');
+            selectionScreen.classList.add('hidden');
+            chatScreen.classList.add('hidden');
+            initialScreen.classList.remove('hidden');
+        };
+
+        const saveToSession = () => {
+            const dataToSave = {
+                savedCharacterName: characterName,
+                savedSystemPrompt: systemPrompt,
+                savedChatHistory: chatHistory
+            };
+            sessionStorage.setItem('chatData', JSON.stringify(dataToSave));
+        };
+        
+        const goBackToInitial = () => {
+            selectionScreen.classList.add('hidden');
+            initialScreen.classList.remove('hidden');
+        }
+
+        startButton.addEventListener('click', searchForCharacter);
+        sendButton.addEventListener('click', sendMessage);
+        restartButton.addEventListener('click', restartChat);
+        backButton.addEventListener('click', goBackToInitial);
+        userInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+        characterInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchForCharacter(); });
+    </script>
 </body>
 </html>
 
